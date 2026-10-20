@@ -156,6 +156,10 @@ bdi.ar, bdi.id { unicode-bidi: isolate; }
 .qt .ln { text-align: right; }
 .qimg { text-align: right; padding: 1mm 0 1mm; direction: rtl; }
 .qimg img { display: inline-block; height: auto; max-width: 100%; }
+/* gambar di samping teks: tinggi soal = yang tertinggi, bukan teks + gambar */
+.blk.q .qb.qs { display: flex; direction: rtl; gap: 3mm; align-items: flex-start; }
+.blk.q .qb.qs .qm { flex: 1; min-width: 0; }
+.blk.q .qb.qs .qimg { flex: none; padding: .6mm 0 0; line-height: 0; }
 .opts { display: grid; direction: rtl; column-gap: 4mm; }
 .opts.c1 { grid-template-columns: 1fr; } .opts.c2 { grid-template-columns: 1fr 1fr; }
 .opts.c3 { grid-template-columns: repeat(3, 1fr); } .opts.c4 { grid-template-columns: repeat(4, 1fr); }
@@ -262,6 +266,8 @@ dialog h3 { margin: 0 0 8px; font-size: 16px; }
         <label class="fld"><span>Tahun pelajaran</span><input id="s-tahun" type="text"></label>
         <label class="fld"><span>Waktu (menit)</span><input id="s-waktu" type="number" min="10" max="240"></label>
         <label class="fld"><span>Garis essay per soal</span><input id="s-essayLines" type="number" min="0" max="8"></label>
+        <label class="fld"><span>Letak gambar soal</span>
+          <select id="s-imgPos"><option value="side">Di samping teks (hemat tempat)</option><option value="top">Di atas pilihan</option></select></label>
         <label class="chkline" id="kotak-line" style="align-self:end;padding-bottom:6px" title="Bagian 2: pilih 10 soal dengan centang, lalu dibuat dua kotak jawaban: soal 1-5 dan soal 6-10"><input type="checkbox" id="s-kotak"> Kotak jawaban Bagian 2 (soal 1-5 dan 6-10)</label>
       </div>
       <details class="more">
@@ -782,9 +788,11 @@ dialog h3 { margin: 0 0 8px; font-size: 16px; }
   }
 
   /* ---------- blok HTML ---------- */
+  function sideImg(q, state) { return !!(state.imgPos !== 'top' && q.image && q.image.src && (q.image.w || 40) <= 80); }
   function qBlock(q, no, sec, state, cols) {
-    var h = '<div class="blk q"><div class="no ar">' + Ops.toAr(no) + '.</div><div class="qb"><div class="qt">' + lines(q.text) + '</div>';
-    if (q.image && q.image.src) {
+    var side = sideImg(q, state);
+    var h = '<div class="blk q"><div class="no ar">' + Ops.toAr(no) + '.</div><div class="qb' + (side ? ' qs' : '') + '">' + (side ? '<div class="qm">' : '') + '<div class="qt">' + lines(q.text) + '</div>';
+    if (q.image && q.image.src && !side) {
       h += '<div class="qimg"><img alt="" src="' + q.image.src + '" style="width:' + (q.image.w || 40) + 'mm"></div>';
     }
     if (q.options.length) {
@@ -795,6 +803,7 @@ dialog h3 { margin: 0 0 8px; font-size: 16px; }
       var n = typeof q.lines === 'number' ? q.lines : state.essayLines;
       h += '<div class="wl">' + new Array(n + 1).join('<i></i>') + '</div>';
     }
+    if (side) h += '</div><div class="qimg"><img alt="" src="' + q.image.src + '" style="width:' + (q.image.w || 40) + 'mm"></div>';
     return h + '</div></div>';
   }
   function boxBlock(words) {
@@ -863,7 +872,7 @@ dialog h3 { margin: 0 0 8px; font-size: 16px; }
       }
       qs.forEach(function (q, i) {
         note(q);
-        var cols = colsFor(q, qbW, content);
+        var cols = colsFor(q, sideImg(q, state) ? qbW - (q.image.w || 40) * 96 / 25.4 - 3 * 96 / 25.4 : qbW, content);
         var html = qBlock(q, i + 1, sec, state, cols);
         blocks.push({ html: (i === 0 ? perintahBlock(state.kelas, sec) : ''), isHead: i === 0, qhtml: html });
       });
@@ -996,7 +1005,7 @@ dialog h3 { margin: 0 0 8px; font-size: 16px; }
   ].join('\n');
 
   var S = {
-    kelas: 4, kotak: false, perKotak: 5, kotakSeed: 1, arah: 'rtl', jenis: 'STS', semester: 1, tahun: '2026 / 2027', waktu: 70, essayLines: 2, kop: 'penuh', showTP: true,
+    kelas: 4, kotak: false, perKotak: 5, kotakSeed: 1, arah: 'rtl', jenis: 'STS', semester: 1, tahun: '2026 / 2027', waktu: 70, essayLines: 2, kop: 'penuh', imgPos: 'side', showTP: true,
     tp: ['Memahami kosakata perintah, sapaan, dan pertanyaan tentang profesi.'],
     sections: { 1: [], 2: [], 3: [] }, tab: 1, view: 'soal', example: true
   };
@@ -1241,7 +1250,7 @@ dialog h3 { margin: 0 0 8px; font-size: 16px; }
 
   /* ---------- pengaturan & tempel ---------- */
   function bindSettings() {
-    var map = { kelas: 'int', arah: 's', jenis: 's', semester: 'int', tahun: 's', waktu: 'int', essayLines: 'int', kop: 's' };
+    var map = { kelas: 'int', arah: 's', jenis: 's', semester: 'int', tahun: 's', waktu: 'int', essayLines: 'int', kop: 's', imgPos: 's' };
     Object.keys(map).forEach(function (k) {
       var el = $('#s-' + k);
       el.value = S[k];
@@ -1261,7 +1270,7 @@ dialog h3 { margin: 0 0 8px; font-size: 16px; }
     st.addEventListener('change', function () { S.showTP = st.checked; schedule(); });
   }
   function syncSettings() {
-    ['kelas', 'arah', 'jenis', 'semester', 'tahun', 'waktu', 'essayLines', 'kop'].forEach(function (k) { $('#s-' + k).value = S[k]; });
+    ['kelas', 'arah', 'jenis', 'semester', 'tahun', 'waktu', 'essayLines', 'kop', 'imgPos'].forEach(function (k) { $('#s-' + k).value = S[k]; });
     if (S.kelas > 2) S.kotak = false; /* kotak jawaban hanya untuk kelas I-II */
     $('#s-kotak').checked = !!S.kotak; $('#kotak-line').style.display = S.kelas > 2 ? 'none' : '';
     $('#s-tp').value = S.tp.join('\n'); $('#s-showtp').checked = S.showTP;
@@ -1526,9 +1535,11 @@ dialog h3 { margin: 0 0 8px; font-size: 16px; }
       return tbl(ws, rows, { rtl: true, mar: [0, 0, 0, 80] });
     }
     function qXml(q, no, sec) {
-      var cw = [mm(9), 0]; cw[1] = W - cw[0];
+      var side = !!(S.imgPos !== 'top' && q.image && q.image.src && imgs[q.image.src] && (q.image.w || 40) <= 80);
+      var iw = side ? mm(q.image.w || 40) + mm(4) : 0;
+      var cw = side ? [mm(9), 0, iw] : [mm(9), 0]; cw[1] = W - cw[0] - iw;
       var inner = qLines(q.text);
-      if (q.image && q.image.src) inner += rp(imgRun(q.image.src, q.image.w || 40), { before: 40, after: 40 });
+      if (q.image && q.image.src && !side) inner += rp(imgRun(q.image.src, q.image.w || 40), { before: 40, after: 40 });
       if (q.options.length) inner += optsXml(q, cw[1]);
       else if (sec === 3 || q.lines > 0) {
         var n = typeof q.lines === 'number' ? q.lines : S.essayLines;
@@ -1539,7 +1550,9 @@ dialog h3 { margin: 0 0 8px; font-size: 16px; }
           inner += para('', { line: 60, rule: 'exact' }) + tbl([cw[1]], lr, { rtl: true });
         }
       }
-      return tbl(cw, [tr([tc(cw[0], rp(run(Ops.toAr(no) + '.', { ar: 1 }))), tc(cw[1], inner)], true)], { rtl: true }) + SP;
+      var cells = [tc(cw[0], rp(run(Ops.toAr(no) + '.', { ar: 1 }))), tc(cw[1], inner)];
+      if (side) cells.push(tc(cw[2], para(imgRun(q.image.src, q.image.w || 40), { before: 20 })));
+      return tbl(cw, [tr(cells, true)], { rtl: true }) + SP;
     }
     function boxXml(words) {
       var ws = equalW(5, W), rows = [], single = bd('single', 6), none = bd('nil');
