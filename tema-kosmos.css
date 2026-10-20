@@ -1,0 +1,93 @@
+/* Tema Kosmos untuk Lembar Soal Arab
+   Gaya: kertas potong berlapis di langit malam. Lapisan arang gelap, tepi kertas bersinar tipis,
+   planet jadi aksen: oranye (aksi utama), teal (kunci benar), biru baja (info), ambar (peringatan).
+   Hanya mengubah tampilan layar. Lembar A4 dan hasil cetak tetap putih. */
+
+/* tombol tema (berlaku di semua tema) */
+.btn[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+@media (max-width: 640px) {
+  #btn-tema .lbl { display: none; }
+  #btn-tema { padding: 7px 9px; }
+}
+
+:root[data-theme="kosmos"] {
+  --bg: #12151a;          /* lapisan terdalam */
+  --panel: #181b20;       /* lapisan tengah */
+  --card: #212429;        /* kertas paling atas */
+  --well: #14171b;        /* cekungan: kolom isian */
+  --ink: #ece9e2;         /* putih kertas hangat */
+  --muted: #a3a7a9;
+  --line: #34373d;
+  --accent: #ff6a1f;      /* planet oranye */
+  --accent-ink: #1c0f06;
+  --accent-soft: #3a2619;
+  --warn: #e9b45e;        /* pita ambar */
+  --warn-bg: #352a19;
+  --bad: #ff8878;
+  --ok: #4fcad2;          /* planet teal */
+  --info: #7f9bd0;        /* planet biru baja */
+  --edge: inset 0 1px 0 rgba(255, 255, 255, .06);
+  --paper: var(--edge), 0 2px 3px rgba(0, 0, 0, .45), 0 10px 22px rgba(0, 0, 0, .30);
+  --shadow: 0 3px 6px rgba(0, 0, 0, .5), 0 18px 40px rgba(0, 0, 0, .5);
+  color-scheme: dark;
+}
+
+/* lapisan: preview paling dalam, panel terangkat di atasnya, bilah atas paling atas */
+:root[data-theme="kosmos"] body { background: var(--bg); }
+:root[data-theme="kosmos"] .preview {
+  background-color: var(--bg);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22900%22 height=%22720%22 viewBox=%220 0 900 720%22%3E%3Cg fill=%22none%22 stroke=%22%23fff%22 stroke-opacity=%22.05%22 stroke-width=%221%22%3E%3Cpath d=%22M0 30.0 L15 34.7 L30 38.4 L45 40.7 L60 41.0 L75 39.5 L90 36.7 L105 33.2 L120 29.8 L135 27.2 L150 25.7 L165 25.3 L180 25.9 L195 26.8 L210 27.7 L225 28.0 L240 27.7 L255 26.8 L270 25.9 L285 25.3 L300 25.7 L315 27.2 L330 29.8 L345 33.2 L360 36.7 L375 39.5 L390 41.0 L405 40.7 L420 38.4 L435 34.7 L450 30.0 L465 25.3 L480 21.6 L495 19.3 L510 19.0 L525 20.5 L540 23.3 L555 26.8 L570 30.2 L585 32.8 L600 34.3 L615 34.7 L630 34.1 L645 33.2 L660 32.3 L675 32.0 L690 32.3 L705 33.2 L720 34.1 L735 34.7 L750 34.3 L765 32.8 L780 30.2 L795 26.8 L810 23.3 L825 20.5 L840 19.0 L855 19.3 L870 21.6 L885 25.3 L900 30.0%22/%3E%3Cpath d=%22M0 101.0 L15 102.3 L30 102.6 L45 102.2 L60 101.2 L75 99.8 L90 98.3 L105 96.8 L120 95.3 L135 93.9 L150 92.3 L165 90.5 L180 88.4 L195 86.0 L210 83.4 L225 80.9 L240 78.7 L255 77.1 L270 76.4 L285 76.6 L300 77.8 L315 79.8 L330 82.2 L345 84.9 L360 87.5 L375 89.8 L390 91.8 L405 93.5 L420 95.0 L435 96.3 L450 97.7 L465 99.1 L480 100.5 L495 101.7 L510 102.4 L525 102.4 L540 101.6 L555 99.9 L570 97.5 L585 94.5 L600 91.2 L615 88.0 L630 85.1 L645 82.9 L660 81.3 L675 80.3 L690 79.9 L705 79.7 L720 79.7 L735 79.8 L750 79.9 L765 80.3 L780 81.1 L795 82.3 L810 84.2 L825 86.7 L840 89.7 L855 92.9 L870 96.1 L885 98.9 L900 101.0%22/%3E%3Cpath d=%22M0 156.5 L15 154.7 L30 152.8 L45 151.1 L60 150.0 L75 149.5 L90 149.6 L105 149.8 L120 149.9 L135 149.7 L150 148.8 L165 147.4 L180 145.7 L195 143.9 L210 142.5 L225 141.8 L240 142.1 L255 143.3 L270 145.3 L285 147.7 L300 150.1 L315 152.1 L330 153.4 L345 154.0 L360 153.9 L375 153.4 L390 152.9 L405 152.7 L420 152.9 L435 153.6 L450 154.6 L465 155.7 L480 156.4 L495 156.4 L510 155.5 L525 153.8 L540 151.4 L555 148.8 L570 146.3 L585 144.4 L600 143.4 L615 143.2 L630 143.8 L645 144.9 L660 146.1 L675 147.0 L690 147.5 L705 147.6 L720 147.2 L735 146.7 L750 146.5 L765 146.9 L780 148.0 L795 149.8 L810 152.0 L825 154.4 L840 156.5 L855 157.9 L870 158.3 L885 157.8 L900 156.5%22/%3E%3Cpath d=%22M0 207.0 L15 205.7 L30 205.6 L45 206.6 L60 208.3 L75 210.2 L90 211.7 L105 212.3 L120 211.9 L135 210.6 L150 208.9 L165 207.3 L180 206.4 L195 206.5 L210 207.7 L225 209.9 L240 212.4 L255 214.7 L270 216.1 L285 216.3 L300 215.0 L315 212.6 L330 209.5 L345 206.5 L360 204.2 L375 203.2 L390 203.7 L405 205.4 L420 208.0 L435 210.7 L450 213.0 L465 214.3 L480 214.4 L495 213.4 L510 211.7 L525 209.8 L540 208.3 L555 207.7 L570 208.1 L585 209.4 L600 211.1 L615 212.7 L630 213.6 L645 213.5 L660 212.3 L675 210.1 L690 207.6 L705 205.3 L720 203.9 L735 203.7 L750 205.0 L765 207.4 L780 210.5 L795 213.5 L810 215.8 L825 216.8 L840 216.3 L855 214.6 L870 212.0 L885 209.3 L900 207.0%22/%3E%3Cpath d=%22M0 265.1 L15 264.0 L30 263.1 L45 262.4 L60 261.9 L75 261.5 L90 261.3 L105 261.3 L120 261.6 L135 262.4 L150 263.7 L165 265.5 L180 267.7 L195 270.2 L210 272.7 L225 275.0 L240 276.9 L255 278.3 L270 279.0 L285 279.3 L300 279.1 L315 278.6 L330 277.8 L345 277.0 L360 276.1 L375 275.1 L390 273.9 L405 272.4 L420 270.7 L435 268.6 L450 266.5 L465 264.3 L480 262.3 L495 260.8 L510 259.8 L525 259.6 L540 260.0 L555 260.9 L570 262.4 L585 264.0 L600 265.8 L615 267.5 L630 269.1 L645 270.5 L660 272.0 L675 273.4 L690 274.8 L705 276.3 L720 277.7 L735 278.9 L750 279.8 L765 280.2 L780 279.9 L795 279.0 L810 277.4 L825 275.4 L840 273.1 L855 270.8 L870 268.6 L885 266.7 L900 265.1%22/%3E%3Cpath d=%22M0 321.9 L15 322.8 L30 323.1 L45 322.9 L60 322.4 L75 321.9 L90 321.9 L105 322.8 L120 324.9 L135 328.1 L150 332.1 L165 336.2 L180 339.9 L195 342.6 L210 343.9 L225 343.7 L240 342.3 L255 340.0 L270 337.4 L285 335.2 L300 333.5 L315 332.5 L330 332.1 L345 331.9 L360 331.5 L375 330.4 L390 328.4 L405 325.7 L420 322.4 L435 319.2 L450 316.6 L465 315.3 L480 315.3 L495 317.0 L510 319.8 L525 323.4 L540 327.1 L555 330.3 L570 332.7 L585 334.1 L600 334.7 L615 334.7 L630 334.7 L645 335.1 L660 336.1 L675 337.8 L690 339.7 L705 341.5 L720 342.7 L735 342.7 L750 341.3 L765 338.5 L780 334.7 L795 330.4 L810 326.3 L825 322.9 L840 320.6 L855 319.7 L870 319.8 L885 320.7 L900 321.9%22/%3E%3Cpath d=%22M0 390.4 L15 389.9 L30 389.0 L45 388.3 L60 388.1 L75 388.6 L90 389.8 L105 391.6 L120 393.6 L135 395.2 L150 395.9 L165 395.5 L180 394.0 L195 391.6 L210 388.6 L225 385.9 L240 383.8 L255 383.0 L270 383.4 L285 385.0 L300 387.4 L315 390.0 L330 392.3 L345 393.9 L360 394.4 L375 394.0 L390 392.9 L405 391.5 L420 390.3 L435 389.6 L450 389.6 L465 390.1 L480 391.0 L495 391.7 L510 391.9 L525 391.4 L540 390.2 L555 388.4 L570 386.4 L585 384.8 L600 384.1 L615 384.5 L630 386.0 L645 388.4 L660 391.4 L675 394.1 L690 396.2 L705 397.0 L720 396.6 L735 395.0 L750 392.6 L765 390.0 L780 387.7 L795 386.1 L810 385.6 L825 386.0 L840 387.1 L855 388.5 L870 389.7 L885 390.4 L900 390.4%22/%3E%3Cpath d=%22M0 449.6 L15 450.0 L30 450.5 L45 451.3 L60 452.2 L75 453.2 L90 454.2 L105 454.8 L120 455.0 L135 454.8 L150 454.1 L165 453.0 L180 451.8 L195 450.6 L210 449.6 L225 448.9 L240 448.4 L255 448.2 L270 448.1 L285 448.0 L300 447.7 L315 447.3 L330 446.8 L345 446.3 L360 445.9 L375 445.7 L390 446.0 L405 446.7 L420 447.8 L435 449.1 L450 450.5 L465 451.8 L480 452.8 L495 453.4 L510 453.7 L525 453.6 L540 453.3 L555 453.0 L570 452.7 L585 452.6 L600 452.6 L615 452.7 L630 452.7 L645 452.4 L660 451.9 L675 451.0 L690 449.8 L705 448.5 L720 447.2 L735 446.1 L750 445.4 L765 445.2 L780 445.4 L795 445.9 L810 446.7 L825 447.5 L840 448.3 L855 448.8 L870 449.2 L885 449.4 L900 449.6%22/%3E%3Cpath d=%22M0 514.3 L15 516.6 L30 519.5 L45 522.3 L60 524.3 L75 525.0 L90 524.0 L105 521.4 L120 517.4 L135 512.8 L150 508.3 L165 504.5 L180 502.1 L195 501.0 L210 501.2 L225 502.0 L240 503.0 L255 503.6 L270 503.4 L285 502.5 L300 501.1 L315 499.7 L330 499.0 L345 499.5 L360 501.5 L375 504.9 L390 509.4 L405 514.2 L420 518.6 L435 521.9 L450 523.7 L465 523.8 L480 522.5 L495 520.3 L510 517.9 L525 515.9 L540 514.6 L555 514.2 L570 514.4 L585 514.7 L600 514.7 L615 513.7 L630 511.5 L645 508.2 L660 504.2 L675 500.1 L690 496.6 L705 494.5 L720 494.0 L735 495.3 L750 498.1 L765 501.7 L780 505.4 L795 508.7 L810 510.9 L825 512.1 L840 512.4 L855 512.2 L870 512.2 L885 512.8 L900 514.3%22/%3E%3Cpath d=%22M0 578.8 L15 578.9 L30 577.9 L45 575.8 L60 572.7 L75 569.0 L90 565.1 L105 561.8 L120 559.5 L135 558.6 L150 559.2 L165 561.2 L180 564.3 L195 567.9 L210 571.5 L225 574.6 L240 576.9 L255 578.0 L270 578.3 L285 577.7 L300 576.6 L315 575.2 L330 573.7 L345 572.2 L360 570.7 L375 569.1 L390 567.4 L405 565.6 L420 563.7 L435 562.2 L450 561.2 L465 561.1 L480 562.1 L495 564.2 L510 567.3 L525 571.0 L540 574.9 L555 578.2 L570 580.5 L585 581.4 L600 580.8 L615 578.8 L630 575.7 L645 572.1 L660 568.5 L675 565.4 L690 563.1 L705 562.0 L720 561.7 L735 562.3 L750 563.4 L765 564.8 L780 566.3 L795 567.8 L810 569.3 L825 570.9 L840 572.6 L855 574.4 L870 576.3 L885 577.8 L900 578.8%22/%3E%3Cpath d=%22M0 632.8 L15 632.3 L30 631.2 L45 629.8 L60 628.4 L75 627.2 L90 626.5 L105 626.3 L120 626.7 L135 627.6 L150 628.5 L165 629.4 L180 630.0 L195 630.2 L210 629.9 L225 629.4 L240 628.8 L255 628.5 L270 628.5 L285 629.1 L300 630.1 L315 631.4 L330 632.6 L345 633.6 L360 634.1 L375 634.0 L390 633.3 L405 632.2 L420 630.9 L435 629.8 L450 629.0 L465 628.7 L480 628.8 L495 629.3 L510 629.8 L525 630.2 L540 630.3 L555 629.9 L570 629.1 L585 628.1 L600 627.1 L615 626.4 L630 626.2 L645 626.6 L660 627.5 L675 628.8 L690 630.3 L705 631.5 L720 632.4 L735 632.7 L750 632.5 L765 631.9 L780 631.2 L795 630.6 L810 630.3 L825 630.4 L840 630.9 L855 631.6 L870 632.4 L885 632.8 L900 632.8%22/%3E%3Cpath d=%22M0 688.6 L15 685.0 L30 681.8 L45 679.7 L60 679.1 L75 680.1 L90 682.3 L105 685.2 L120 688.1 L135 690.3 L150 691.5 L165 691.5 L180 690.6 L195 689.3 L210 688.3 L225 688.1 L240 689.1 L255 691.2 L270 694.1 L285 697.1 L300 699.6 L315 700.9 L330 700.7 L345 698.9 L360 695.9 L375 692.3 L390 688.9 L405 686.2 L420 684.8 L435 684.7 L450 685.6 L465 687.1 L480 688.5 L495 689.2 L510 688.8 L525 687.4 L540 685.3 L555 683.1 L570 681.4 L585 680.9 L600 681.8 L615 684.1 L630 687.5 L645 691.4 L660 695.0 L675 697.6 L690 698.8 L705 698.6 L720 697.1 L735 695.0 L750 692.9 L765 691.4 L780 691.0 L795 691.6 L810 692.9 L825 694.4 L840 695.6 L855 695.7 L870 694.5 L885 692.0 L900 688.6%22/%3E%3C/g%3E%3C/svg%3E"), linear-gradient(180deg, #171a20 0%, #101318 100%);
+  background-size: 900px 720px, auto;
+}
+:root[data-theme="kosmos"] .panel { position: relative; z-index: 2; box-shadow: 10px 0 30px rgba(0, 0, 0, .42); }
+:root[data-theme="kosmos"] .top { position: relative; z-index: 5; box-shadow: var(--edge), 0 6px 20px rgba(0, 0, 0, .45); }
+@media (max-width: 1000px) {
+  :root[data-theme="kosmos"] .panel { box-shadow: 0 10px 24px rgba(0, 0, 0, .4); }
+}
+
+/* logo di atas lempeng terang agar terbaca di latar gelap */
+:root[data-theme="kosmos"] .brand img { background: #ece9e2; border-radius: 50%; padding: 2px; box-shadow: 0 2px 6px rgba(0, 0, 0, .5); }
+
+/* kertas bertumpuk */
+:root[data-theme="kosmos"] .card { box-shadow: var(--paper); }
+:root[data-theme="kosmos"] .tab { box-shadow: var(--edge); }
+:root[data-theme="kosmos"] .tab[aria-selected="true"] { box-shadow: var(--edge), 0 0 0 1px var(--accent); }
+:root[data-theme="kosmos"] .tabs { box-shadow: 0 1px 0 var(--line), 0 8px 12px -8px rgba(0, 0, 0, .5); }
+:root[data-theme="kosmos"] .btn { box-shadow: var(--edge), 0 1px 2px rgba(0, 0, 0, .4); }
+:root[data-theme="kosmos"] .btn.ghost { box-shadow: none; }
+:root[data-theme="kosmos"] .btn.pri { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .28), 0 2px 8px rgba(255, 106, 31, .28); }
+:root[data-theme="kosmos"] dialog { box-shadow: var(--shadow); }
+
+/* kolom isian tampak dipotong ke dalam kertas */
+:root[data-theme="kosmos"] .fld input,
+:root[data-theme="kosmos"] .fld select,
+:root[data-theme="kosmos"] .fld textarea,
+:root[data-theme="kosmos"] .paste { background: var(--well); box-shadow: inset 0 1px 3px rgba(0, 0, 0, .45); }
+:root[data-theme="kosmos"] .card textarea.qt,
+:root[data-theme="kosmos"] .card input.op { background: var(--well); }
+
+/* warna planet sebagai makna */
+:root[data-theme="kosmos"] .chip.info { background: #222c42; color: var(--info); }
+:root[data-theme="kosmos"] .note { background: #222c42; color: var(--ink); }
+:root[data-theme="kosmos"] .note.warn { background: var(--warn-bg); color: var(--warn); }
+:root[data-theme="kosmos"] .opt-row.key input.op { border-color: var(--ok); }
+:root[data-theme="kosmos"] .imgrow.drop { border-color: var(--accent); background: var(--accent-soft); }
+:root[data-theme="kosmos"] .seg { box-shadow: var(--edge); }
+
+/* sakelar: pegangannya planet */
+:root[data-theme="kosmos"] .switch input { background: var(--well); border-color: #5a5f66; }
+:root[data-theme="kosmos"] .switch input::after { background: radial-gradient(circle at 35% 30%, #d4d7d8, #7d8587 60%, #4d5356); }
+:root[data-theme="kosmos"] .switch input:checked { background: #2a1a10; border-color: var(--accent); }
+:root[data-theme="kosmos"] .switch input:checked::after { background: radial-gradient(circle at 35% 30%, #ffb27a, #ff6a1f 55%, #c23f06); }
+
+/* permukaan bawaan browser mengikuti palet */
+:root[data-theme="kosmos"] { caret-color: var(--accent); }
+:root[data-theme="kosmos"] .panel, :root[data-theme="kosmos"] .preview { scrollbar-color: #4a4e55 transparent; }
+:root[data-theme="kosmos"] :focus-visible { outline-color: var(--accent); }
+:root[data-theme="kosmos"] #toast { background: var(--card); color: var(--ink); box-shadow: var(--shadow); border: 1px solid var(--line); }
+
+/* cetak: selalu putih, tanpa kontur */
+@media print {
+  :root[data-theme="kosmos"] body,
+  :root[data-theme="kosmos"] .preview { background: #fff !important; background-image: none !important; }
+}
