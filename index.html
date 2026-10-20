@@ -1987,11 +1987,15 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--accent); }
     window.addEventListener('resize', function () { $('#pages').style.setProperty('--s', fitScale()); });
     (function () {
       var app = document.querySelector('.app'), nav = document.querySelectorAll('.pane-nav button');
+      var pos = { susun: 0, lembar: 0 };
       function setPane(pn) {
+        var cur = app.getAttribute('data-pane');
+        if (cur === pn) return;
+        pos[cur] = window.pageYOffset; /* ingat posisi gulir tampilan yang ditinggalkan */
         app.setAttribute('data-pane', pn);
         nav.forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.pane === pn ? 'true' : 'false'); });
         $('#pages').style.setProperty('--s', fitScale());
-        window.scrollTo(0, 0);
+        window.scrollTo(0, pos[pn] || 0);
       }
       nav.forEach(function (b) { b.addEventListener('click', function () { setPane(b.dataset.pane); }); });
     })();
