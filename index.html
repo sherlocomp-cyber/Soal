@@ -157,8 +157,8 @@ bdi.ar, bdi.id { unicode-bidi: isolate; }
 .qimg { text-align: right; padding: 1mm 0 1mm; direction: rtl; }
 .qimg img { display: inline-block; height: auto; max-width: 100%; }
 /* gambar di samping teks: tinggi soal = yang tertinggi, bukan teks + gambar */
-.blk.q .qb.qs { display: flex; direction: rtl; gap: 3mm; align-items: flex-start; }
-.blk.q .qb.qs .qm { flex: 1; min-width: 0; }
+.blk.q .qb.qs { display: flex; direction: rtl; gap: 7mm; align-items: flex-start; }
+.blk.q .qb.qs .qm { flex: 0 1 auto; min-width: 0; }
 .blk.q .qb.qs .qimg { flex: none; padding: .6mm 0 0; line-height: 0; }
 .opts { display: grid; direction: rtl; column-gap: 4mm; }
 .opts.c1 { grid-template-columns: 1fr; } .opts.c2 { grid-template-columns: 1fr 1fr; }
@@ -872,7 +872,7 @@ dialog h3 { margin: 0 0 8px; font-size: 16px; }
       }
       qs.forEach(function (q, i) {
         note(q);
-        var cols = colsFor(q, sideImg(q, state) ? qbW - (q.image.w || 40) * 96 / 25.4 - 3 * 96 / 25.4 : qbW, content);
+        var cols = sideImg(q, state) ? 1 : colsFor(q, qbW, content);
         var html = qBlock(q, i + 1, sec, state, cols);
         blocks.push({ html: (i === 0 ? perintahBlock(state.kelas, sec) : ''), isHead: i === 0, qhtml: html });
       });
@@ -1518,11 +1518,12 @@ dialog h3 { margin: 0 0 8px; font-size: 16px; }
       var p = Ops.perintah(S.kelas, sec, hasBox);
       return rp(run(p.huruf + '.', { ar: 1, b: 1 }) + run(' ', { b: 1 }) + run(p.text, { ar: 1, b: 1 }), { keepNext: true, before: 70, after: 80 });
     }
-    function optsXml(q, cw) {
+    function optsXml(q, cw, one) {
       var n = q.options.length, maxLen = 0;
       q.options.forEach(function (o) { var l = String(o).replace(/[\u064B-\u0652\u0640§]/g, '').length; if (l > maxLen) maxLen = l; });
       var need = (maxLen + 4) * 2.6 + 2, tries = n >= 3 ? [n, 1] : n === 2 ? [2, 1] : [1], cols = 1; /* 3-4 opsi: satu baris penuh, atau semua turun ke bawah */
       for (var t = 0; t < tries.length; t++) { if ((cw / 56.7) / tries[t] >= need) { cols = tries[t]; break; } }
+      if (one) cols = 1;
       var ws = equalW(cols, cw), rows = [];
       for (var s = 0; s < n; s += cols) {
         var cells = [];
@@ -1536,11 +1537,17 @@ dialog h3 { margin: 0 0 8px; font-size: 16px; }
     }
     function qXml(q, no, sec) {
       var side = !!(S.imgPos !== 'top' && q.image && q.image.src && imgs[q.image.src] && (q.image.w || 40) <= 80);
-      var iw = side ? mm(q.image.w || 40) + mm(4) : 0;
-      var cw = side ? [mm(9), 0, iw] : [mm(9), 0]; cw[1] = W - cw[0] - iw;
+      var iw = side ? mm(q.image.w || 40) + mm(7) : 0, tw = 0;
+      if (side) { /* lebar kolom teks mengikuti baris terpanjang (perkiraan), gambar tepat di sebelahnya */
+        var mx = 0, cnt = function (t) { var l = String(t).replace(/[\u064B-\u0652\u0640§]/g, '').length; if (l > mx) mx = l; };
+        String(q.text).split('\n').forEach(cnt); q.options.forEach(function (o) { cnt(o); mx += 0; });
+        tw = Math.min(W - mm(9) - iw, Math.max(mm(36), Math.round((mx + 3) * 2.7 * 56.7) + mm(3)));
+      }
+      var cw = side ? [mm(9), tw, iw] : [mm(9), 0]; if (!side) cw[1] = W - cw[0];
+      if (side && W - cw[0] - tw - iw > 0) cw.push(W - cw[0] - tw - iw);
       var inner = qLines(q.text);
       if (q.image && q.image.src && !side) inner += rp(imgRun(q.image.src, q.image.w || 40), { before: 40, after: 40 });
-      if (q.options.length) inner += optsXml(q, cw[1]);
+      if (q.options.length) inner += optsXml(q, cw[1], side);
       else if (sec === 3 || q.lines > 0) {
         var n = typeof q.lines === 'number' ? q.lines : S.essayLines;
         /* tiap garis = satu baris tabel (border paragraf yang berurutan akan menyatu menjadi satu garis) */
@@ -1551,7 +1558,7 @@ dialog h3 { margin: 0 0 8px; font-size: 16px; }
         }
       }
       var cells = [tc(cw[0], rp(run(Ops.toAr(no) + '.', { ar: 1 }))), tc(cw[1], inner)];
-      if (side) cells.push(tc(cw[2], para(imgRun(q.image.src, q.image.w || 40), { before: 20 })));
+      if (side) { cells.push(tc(cw[2], para(imgRun(q.image.src, q.image.w || 40), { before: 20 }))); if (cw[3]) cells.push(tc(cw[3], '')); }
       return tbl(cw, [tr(cells, true)], { rtl: true }) + SP;
     }
     function boxXml(words) {
