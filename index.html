@@ -293,6 +293,29 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--accent); }
 @media (max-width: 640px) { #btn-tema .lbl { display: none; } #btn-tema { padding: 7px 9px; } }
 @media (max-width: 460px) { .brand .bn { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; } }
 
+/* ---------- prompt dan gambar untuk Google Flow ---------- */
+#sec-img.drop { outline: 2px dashed var(--accent); outline-offset: 4px; border-radius: 8px; }
+.glist { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+details.gi { background: var(--card); border: 1px solid var(--line); border-radius: 8px; }
+details.gi > summary { display: flex; align-items: center; gap: 8px; padding: 7px 9px; cursor: pointer; list-style: none; min-height: 44px; }
+details.gi > summary::-webkit-details-marker { display: none; }
+details.gi[open] > summary { border-bottom: 1px solid var(--line); }
+.gi .gn { flex: none; min-width: 36px; text-align: center; font-weight: 700; padding: 3px 6px; border-radius: 5px; background: var(--accent-soft); color: var(--accent); }
+.gi summary img { flex: none; width: 40px; height: 30px; object-fit: contain; background: #fff; border: 1px solid var(--line); border-radius: 4px; }
+.gi .gd { flex: 1; min-width: 0; font-size: 13px; }
+.gi .gd b { display: block; font-weight: 600; }
+.gi .gd small { display: block; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gi .gb { padding: 8px 10px 10px; }
+.gi .gp { margin: 0; padding: 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); font-size: 13px; line-height: 1.5; overflow-wrap: anywhere; user-select: text; }
+.gi .gauto { display: block; margin-top: 6px; color: var(--muted); font-size: 12.5px; }
+#dlg-bulk { width: min(94vw, 600px); max-width: none; }
+#bk-list { display: grid; gap: 8px; max-height: 52vh; overflow: auto; margin: 10px 0 4px; padding-right: 2px; }
+.bk { display: grid; grid-template-columns: 64px 1fr; gap: 10px; align-items: center; }
+.bk img { width: 64px; height: 48px; object-fit: contain; background: #fff; border: 1px solid var(--line); border-radius: 4px; }
+.bk .bm { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.bk .bn { font-size: 12.5px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bk select { width: 100%; min-width: 0; padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--card); }
+
 </style>
 <link rel="stylesheet" href="tema-kosmos.css">
 <script src="tema-kosmos.js"></script>
@@ -380,6 +403,17 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--accent); }
       <p class="note warn" id="example">Ini soal contoh. Tempel soal Anda lalu tekan Baca soal (ganti semua).</p>
     </section>
 
+    <section class="sec" id="sec-img" hidden>
+      <h2>Gambar soal (Google Flow)</h2>
+      <p class="hint" id="img-hint" style="margin-top:0"></p>
+      <div class="row">
+        <button class="btn pri" id="btn-img-copyall" type="button"><svg class="ic"><use href="#i-copy"/></svg> Salin semua prompt</button>
+        <button class="btn" id="btn-img-zip" type="button"><svg class="ic"><use href="#i-image"/></svg> Pasang gambar dari ZIP</button>
+      </div>
+      <p class="hint" style="margin-top:6px">ZIP atau banyak gambar juga bisa ditarik ke kotak ini. Berkas bernama G3.png atau 3.png dipasang ke soal G3; nama lain dipasang menurut urutan nama, dan bisa diperbaiki sebelum dipasang.</p>
+      <div class="glist" id="img-list"></div>
+    </section>
+
     <section class="sec">
       <h2>Soal</h2>
       <div class="tabs" role="tablist">
@@ -433,6 +467,13 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--accent); }
   </div>
   <div class="row"><button class="btn pri" id="dlg-doc-go">Export</button><button class="btn" id="dlg-doc-cancel">Batal</button></div>
 </dialog>
+<dialog id="dlg-bulk">
+  <h3>Pasang gambar dari ZIP</h3>
+  <p class="hint" id="bk-info" style="margin-top:0"></p>
+  <div id="bk-list"></div>
+  <div class="row"><button class="btn pri" id="bk-go" type="button">Pasang gambar</button><button class="btn" id="bk-cancel" type="button">Batal</button></div>
+</dialog>
+<input type="file" id="file-bulk" accept=".zip,application/zip,application/x-zip-compressed,image/*" multiple hidden>
 <input type="file" id="file" accept="image/*" hidden>
 <input type="file" id="file-draft" accept="application/json,.json" hidden>
 <div id="toast" role="status"></div>
@@ -555,6 +596,19 @@ window.PROMPTS_READY = Promise.all(['k12', 'k3', 'k456'].map(function (k) {
     return q;
   }
 
+  /* Bagian penutup "[PROMPT GAMBAR]": baris G1: ..., G2: ... (satu prompt per soal bergambar, urut dari Bagian 1). */
+  function isImgHeading(line) { return /^\s*[\[\(#*\s]*PROMPT\s+GAMBAR\b/i.test(line); }
+  function parseImgPrompts(lines) {
+    var out = {};
+    lines.forEach(function (l) {
+      var m = l.match(/^\s*[\*\-\u2022]?\s*(?:\[G(?:ambar)?\s*0*(\d{1,3})\]\s*[:.)\-\u2013\u2014]?|G(?:ambar)?\s*0*(\d{1,3})\s*[:.)\-\u2013\u2014])\s*(.+?)\s*$/i);
+      if (!m) return;
+      var n = parseInt(m[1] || m[2], 10);
+      if (!out[n]) out[n] = m[3].replace(/\s+/g, ' ');
+    });
+    return out;
+  }
+
   function parseSection(lines) {
     var hasQ = lines.some(function (l) { return /^\s*Q\s*:/.test(l); });
     var hasBullet = lines.some(function (l) { return /^\s{0,2}[\*\-•]\s+\S/.test(l); });
@@ -587,8 +641,9 @@ window.PROMPTS_READY = Promise.all(['k12', 'k3', 'k456'].map(function (k) {
     var text = String(input || '').replace(/\r\n?/g, '\n').replace(/^\s*```.*$/gm, '').replace(/\*\*/g, '').replace(/[\u200e\u200f]/g, '');
     var lines = text.split('\n');
     var out = { tp: [], sections: { 1: [], 2: [], 3: [] }, stats: { ignored: 0, flagged: 0, total: 0 } };
-    var segs = { 0: [], 1: [], 2: [], 3: [] }, sec = 0, seen = false;
+    var segs = { 0: [], 1: [], 2: [], 3: [], 4: [] }, sec = 0, seen = false;
     lines.forEach(function (l) {
+      if (isImgHeading(l)) { sec = 4; return; }
       var h = isHeading(l);
       if (h) { sec = h; seen = true; return; }
       segs[sec].push(l);
@@ -610,6 +665,12 @@ window.PROMPTS_READY = Promise.all(['k12', 'k3', 'k456'].map(function (k) {
       out.stats.ignored += r.ignored;
       r.questions.forEach(function (q) { out.stats.total++; if (q.flags.length) out.stats.flagged++; });
     });
+    /* Prompt gambar ke-n dipasangkan dengan soal bergambar ke-n (urut Bagian 1, 2, 3). */
+    var iq = [], pr = parseImgPrompts(segs[4]);
+    [1, 2, 3].forEach(function (n) { out.sections[n].forEach(function (q) { if (q.imgDesc !== null) iq.push(q); }); });
+    iq.forEach(function (q, i) { if (pr[i + 1]) q.imgPrompt = pr[i + 1]; });
+    out.stats.imgQs = iq.length;
+    out.stats.imgPrompts = Object.keys(pr).length;
     return out;
   }
 
@@ -1070,6 +1131,71 @@ window.PROMPTS_READY = Promise.all(['k12', 'k3', 'k456'].map(function (k) {
 
 </script>
 <script>
+/* Pembaca ZIP kecil untuk memasang gambar hasil Google Flow. Tanpa pustaka luar:
+   isi ZIP diperluas dengan DecompressionStream bawaan browser. Berkas dibaca per potongan (slice),
+   jadi ZIP besar tidak dimuat utuh ke memori. */
+(function (root) {
+  'use strict';
+  var MIME = { png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', webp: 'image/webp', gif: 'image/gif', bmp: 'image/bmp' };
+  function u16(d, o) { return d.getUint16(o, true); }
+  function u32(d, o) { return d.getUint32(o, true); }
+  function mimeOf(name) { var m = /\.([A-Za-z0-9]+)$/.exec(name); return m ? (MIME[m[1].toLowerCase()] || null) : null; }
+  function read(blob, a, b) { return blob.slice(a, b).arrayBuffer(); }
+
+  /* Semua isi ZIP: [{ name, flags, method, csize, usize, off, file }] */
+  function list(file) {
+    var size = file.size, tail = Math.min(size, 65557);
+    if (size < 22) return Promise.reject(new Error('Bukan berkas ZIP'));
+    return read(file, size - tail, size).then(function (buf) {
+      var d = new DataView(buf), i;
+      for (i = buf.byteLength - 22; i >= 0; i--) if (u32(d, i) === 0x06054b50) break;
+      if (i < 0) throw new Error('Bukan berkas ZIP');
+      var n = u16(d, i + 10), cdSize = u32(d, i + 12), cdOff = u32(d, i + 16);
+      if (n === 0xFFFF || cdOff === 0xFFFFFFFF) throw new Error('ZIP berukuran sangat besar tidak didukung');
+      return read(file, cdOff, cdOff + cdSize).then(function (cb) {
+        var cd = new DataView(cb), u8 = new Uint8Array(cb), p = 0, out = [], dec = new TextDecoder('utf-8');
+        for (var k = 0; k < n && p + 46 <= cb.byteLength; k++) {
+          if (u32(cd, p) !== 0x02014b50) break;
+          var nl = u16(cd, p + 28), el = u16(cd, p + 30), cl = u16(cd, p + 32);
+          out.push({ name: dec.decode(u8.subarray(p + 46, p + 46 + nl)), flags: u16(cd, p + 8), method: u16(cd, p + 10),
+            csize: u32(cd, p + 20), usize: u32(cd, p + 24), off: u32(cd, p + 42), file: file });
+          p += 46 + nl + el + cl;
+        }
+        return out;
+      });
+    });
+  }
+
+  /* Hanya berkas gambar; folder, berkas tersembunyi, dan sampah Mac dilewati. */
+  function images(file) {
+    return list(file).then(function (es) {
+      return es.filter(function (e) {
+        var base = e.name.split('/').pop();
+        return base && base.charAt(0) !== '.' && !/^__MACOSX\//.test(e.name) && mimeOf(e.name);
+      });
+    });
+  }
+
+  /* Satu isi ZIP menjadi Blob bertipe gambar. */
+  function extract(e) {
+    if (e.flags & 1) return Promise.reject(new Error('ZIP berkata sandi tidak didukung'));
+    return read(e.file, e.off, e.off + 30).then(function (hb) {
+      var h = new DataView(hb);
+      if (u32(h, 0) !== 0x04034b50) throw new Error('ZIP rusak');
+      var start = e.off + 30 + u16(h, 26) + u16(h, 28), part = e.file.slice(start, start + e.csize), type = mimeOf(e.name) || 'application/octet-stream';
+      if (e.method === 0) return part.slice(0, part.size, type);
+      if (e.method !== 8) throw new Error('Cara kompresi ZIP ini tidak didukung');
+      if (typeof DecompressionStream === 'undefined') throw new Error('Browser ini belum bisa membuka ZIP. Ekstrak dulu, lalu pilih gambarnya');
+      return new Response(part.stream().pipeThrough(new DecompressionStream('deflate-raw'))).blob().then(function (b) { return b.slice(0, b.size, type); });
+    });
+  }
+
+  var api = { list: list, images: images, extract: extract, mimeOf: mimeOf };
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+  else root.Zip = api;
+})(typeof self !== 'undefined' ? self : this);
+</script>
+<script>
 /* Antarmuka: keadaan, kartu soal, pratinjau, simpan draf, cetak. */
 (function () {
   'use strict';
@@ -1103,11 +1229,13 @@ window.PROMPTS_READY = Promise.all(['k12', 'k3', 'k456'].map(function (k) {
   function mkQ(p) {
     return { id: ++uid, include: true, text: p.text || '', options: p.options || [], key: p.key === undefined ? null : p.key,
       keySource: p.keySource || null, keyText: p.keyText || '', imgDesc: p.imgDesc === undefined ? null : p.imgDesc,
-      image: null, lines: undefined, flags: p.flags || [] };
+      imgPrompt: p.imgPrompt || null, gNo: null, image: null, lines: undefined, flags: p.flags || [] };
   }
   function loadParsed(res, replace) {
+    var g = replace ? 0 : maxG();
     [1, 2, 3].forEach(function (n) {
       var qs = res.sections[n].map(mkQ);
+      qs.forEach(function (q) { if (q.imgDesc !== null) q.gNo = ++g; });
       S.sections[n] = replace ? qs : S.sections[n].concat(qs);
     });
     if (replace && res.tp.length) S.tp = res.tp;
@@ -1256,6 +1384,7 @@ window.PROMPTS_READY = Promise.all(['k12', 'k3', 'k456'].map(function (k) {
     renderTabs();
     renderPola();
     renderKotakInfo();
+    renderImgPanel();
     $('#example').hidden = !S.example;
   }
   var limitHit = false;
@@ -1505,8 +1634,13 @@ window.PROMPTS_READY = Promise.all(['k12', 'k3', 'k456'].map(function (k) {
     var s = res.sections;
     var msg = 'Terbaca: Bagian 1 = ' + s[1].length + ' soal · Bagian 2 = ' + s[2].length + ' · Bagian 3 = ' + s[3].length;
     if (res.tp.length && replace) msg += ' · ' + res.tp.length + ' TP';
+    if (res.stats.imgQs) {
+      msg += ' \u00b7 ' + res.stats.imgQs + ' soal bergambar' + (res.stats.imgPrompts ? ', ' + res.stats.imgPrompts + ' prompt gambar terbaca' : ', prompt gambar belum ada (dibuat otomatis dari deskripsi)');
+    }
+    var imgOff = res.stats.imgPrompts && res.stats.imgPrompts !== res.stats.imgQs;
+    if (imgOff) msg += '. Jumlah prompt gambar tidak sama dengan jumlah soal bergambar; cek panel Gambar soal';
     if (res.stats.flagged) msg += '. ' + res.stats.flagged + ' soal ditandai kuning; cek sebelum cetak';
-    $('#summary').className = 'note' + (res.stats.flagged ? ' warn' : ''); $('#summary').textContent = msg; $('#summary').hidden = false;
+    $('#summary').className = 'note' + (res.stats.flagged || imgOff ? ' warn' : ''); $('#summary').textContent = msg; $('#summary').hidden = false;
     $('#paste').value = '';
     syncSettings(); renderPromptUI(); renderCards(); schedule();
     toast((hadQs ? 'Soal lama diganti: terbaca ' : 'Terbaca ') + res.stats.total + ' soal' + (res.stats.flagged ? ', ' + res.stats.flagged + ' ditandai kuning' : ''),
@@ -1529,6 +1663,160 @@ window.PROMPTS_READY = Promise.all(['k12', 'k3', 'k456'].map(function (k) {
     fr.onload = function () { try { applyDraft(fr.result); S.example = false; syncSettings(); renderCards(); schedule(); toast('Draf dibuka'); } catch (e) { toast('Berkas draf tidak valid'); } };
     fr.readAsText(file);
   }
+  /* ---------- prompt gambar untuk Google Flow ---------- */
+  var IMG_STYLE = "simple flat vector illustration for a children's school textbook, clean bold outlines, bright simple colors, high contrast, one centered subject, plain white background, square composition, no text, no letters, no numbers, no Arabic script, no watermark";
+  /* Ditambahkan di ujung prompt AI; menimpa larangan "judul lain" di prompt dasar. */
+  var IMG_RULES = [
+    '=====================================',
+    'TAMBAHAN: PROMPT GAMBAR UNTUK GOOGLE FLOW',
+    '=====================================',
+    'Aturan ini MENAMBAH format keluaran di atas dan menang bila bertentangan dengan "tanpa judul lain" atau "DILARANG ... judul bagian lain". Setelah soal terakhir [BAGIAN 3], tulis satu bagian lagi di blok kode yang SAMA, diawali penanda [PROMPT GAMBAR] di barisnya sendiri.',
+    '1. Buat satu prompt untuk SETIAP baris [GAMBAR: ...] di seluruh naskah (Bagian 1, 2, dan 3). Urutannya sama persis dengan urutan soal bergambar dari awal [BAGIAN 1] sampai akhir [BAGIAN 3]. Jumlah prompt harus sama dengan jumlah baris [GAMBAR: ...].',
+    '2. Satu baris per gambar, format `G1: prompt`, `G2: prompt`, dan seterusnya. Nomor urut dari 1 tanpa loncat. Tanpa bullet, tanpa markdown, tanpa baris kosong di antaranya.',
+    '3. Prompt ditulis dalam bahasa Inggris, satu baris. Awali dengan adegan yang persis sesuai deskripsi [GAMBAR: ...] (satu objek atau satu kegiatan yang jelas, 10 sampai 25 kata), lalu akhiri dengan gaya berikut, persis seperti ini: ' + IMG_STYLE,
+    '4. Gambar tidak boleh memuat tulisan apa pun (huruf, angka, aksara Arab). Jika soal menanyakan jam, tulis waktunya secara spesifik (contoh: an analog wall clock showing exactly 3 o\'clock).',
+    'Contoh bagian ini (bila ada dua soal bergambar):',
+    '[PROMPT GAMBAR]',
+    'G1: a wooden pencil lying on a school desk, ' + IMG_STYLE,
+    'G2: a doctor examining a young patient in a clinic, ' + IMG_STYLE,
+    'Jika naskah tidak punya soal bergambar, jangan tulis bagian [PROMPT GAMBAR].'
+  ].join('\n');
+
+  var openG = {};
+  function maxG() {
+    var m = 0;
+    [1, 2, 3].forEach(function (n) { S.sections[n].forEach(function (q) { if (q.gNo > m) m = q.gNo; }); });
+    return m;
+  }
+  /* Semua soal bergambar (atau yang punya gambar), urut menurut nomor G. Soal lama tanpa nomor diberi nomor di sini. */
+  function imgQs() {
+    var a = [], mx = maxG();
+    [1, 2, 3].forEach(function (n) { S.sections[n].forEach(function (q, i) {
+      if (q.imgDesc !== null || q.image) a.push({ q: q, sec: n, no: i + 1 });
+    }); });
+    a.forEach(function (x) { if (!x.q.gNo) x.q.gNo = ++mx; });
+    a.sort(function (x, y) { return x.q.gNo - y.q.gNo; });
+    return a;
+  }
+  /* Prompt dari AI; bila tidak ada, dibuat dari deskripsi gambar supaya tetap bisa dipakai. */
+  function imgPromptOf(q) {
+    if (q.imgPrompt) return q.imgPrompt;
+    var d = (q.imgDesc || '').trim();
+    return d ? d.replace(/[.\s]+$/, '') + '. ' + IMG_STYLE : '';
+  }
+  function renderImgPanel() {
+    var list = imgQs(), sec = $('#sec-img');
+    sec.hidden = !list.length;
+    if (!list.length) return;
+    var have = list.filter(function (x) { return x.q.image; }).length;
+    $('#img-hint').textContent = list.length + ' soal bergambar, ' + have + ' sudah terpasang gambarnya. Salin prompt ke Google Flow, unduh hasilnya (ZIP atau banyak berkas), lalu pasang sekaligus.';
+    $('#img-list').innerHTML = list.map(function (x) {
+      var q = x.q, p = imgPromptOf(q);
+      return '<details class="gi" data-id="' + q.id + '"' + (openG[q.id] ? ' open' : '') + '><summary>' +
+        '<span class="gn">G' + q.gNo + '</span>' + (q.image ? '<img alt="" src="' + q.image.src + '">' : '') +
+        '<span class="gd"><b>Bagian ' + x.sec + ' \u00b7 soal ' + x.no + '</b><small>' + Layout.esc(q.imgDesc || 'Tanpa deskripsi') + '</small></span>' +
+        '<span class="chip' + (q.image ? ' info' : '') + '">' + (q.image ? 'Terpasang' : 'Belum') + '</span></summary>' +
+        '<div class="gb"><p class="gp" dir="ltr">' + (p ? Layout.esc(p) : 'Soal ini belum punya deskripsi gambar.') + '</p>' +
+        (!q.imgPrompt && p ? '<small class="gauto">Dibuat otomatis dari deskripsi, karena hasil AI tidak memuat prompt gambar untuk soal ini.</small>' : '') +
+        '<div class="row"><button class="btn sm" type="button" data-gcopy' + (p ? '' : ' disabled') + '>' + IC('copy') + ' Salin prompt</button></div></div></details>';
+    }).join('');
+  }
+  function copyAllPrompts() {
+    var t = imgQs().map(function (x) { var p = imgPromptOf(x.q); return p ? 'G' + x.q.gNo + ': ' + p : ''; }).filter(Boolean).join('\n');
+    if (!t) { toast('Belum ada prompt gambar'); return; }
+    copyText(t).then(function (ok) { toast(ok ? 'Semua prompt gambar disalin' : 'Gagal menyalin. Buka tiap soal lalu salin satu per satu.'); });
+  }
+
+  /* ---------- pasang banyak gambar sekaligus (ZIP dari Flow atau banyak berkas) ---------- */
+  var NAT = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
+  var bulk = { items: [], urls: [], targets: [] };
+  /* Nomor dari nama berkas: 3.png, 03.jpg, G3.png, gambar-3.png. Nama acak dari Flow tidak punya nomor. */
+  function numFromName(name) {
+    var b = String(name).split('/').pop().replace(/\.[^.]+$/, '');
+    var m = /^(?:gambar|image|img|g)?[\s_-]*0*(\d{1,3})(?:[\s_.()-]|$)/i.exec(b) || /(?:^|[^A-Za-z0-9])(?:gambar|g)[\s_-]*0*(\d{1,3})(?!\d)/i.exec(b);
+    return m ? parseInt(m[1], 10) : 0;
+  }
+  /* Berkas ber-nomor ke soal bernomor sama; sisanya mengisi soal yang belum bergambar lebih dulu, menurut urutan. */
+  function autoAssign(items, targets) {
+    var byNo = {}, used = {}, res = items.map(function () { return null; });
+    targets.forEach(function (t) { byNo[t.q.gNo] = t; });
+    items.forEach(function (it, i) {
+      var n = numFromName(it.name);
+      if (n && byNo[n] && !used[n]) { res[i] = byNo[n]; used[n] = 1; }
+    });
+    var free = targets.filter(function (t) { return !used[t.q.gNo]; });
+    free = free.filter(function (t) { return !t.q.image; }).concat(free.filter(function (t) { return t.q.image; }));
+    var fi = 0;
+    items.forEach(function (it, i) { if (!res[i] && fi < free.length) res[i] = free[fi++]; });
+    return res;
+  }
+  function putImage(q, blob) {
+    return compressImage(blob).then(function (src) {
+      q.image = { src: src, w: (q.image && q.image.w) || 40 };
+      if (q.imgDesc === null) q.imgDesc = '';
+      return toGray(src).then(function (bw) { if (bw && q.image && q.image.src === src) q.image.bw = bw; });
+    });
+  }
+  function bulkPick(files) {
+    files = [].slice.call(files || []);
+    if (!files.length) return;
+    toast('Membaca berkas...');
+    var jobs = files.map(function (f) {
+      if (/\.zip$/i.test(f.name) || /zip/i.test(f.type)) {
+        return Zip.images(f).then(function (es) {
+          return Promise.all(es.map(function (e) { return Zip.extract(e).then(function (b) { return { name: e.name, blob: b }; }); }));
+        });
+      }
+      return Promise.resolve(/^image\//.test(f.type) ? [{ name: f.name, blob: f }] : []);
+    });
+    Promise.all(jobs).then(function (parts) {
+      var items = [].concat.apply([], parts);
+      if (!items.length) { toast('Tidak ada gambar yang bisa dibaca di berkas itu'); return; }
+      items.sort(function (a, b) { return NAT.compare(a.name, b.name); });
+      openBulk(items);
+    }, function (err) { toast('Berkas tidak bisa dibuka: ' + ((err && err.message) || 'rusak')); });
+  }
+  function bkLabel(t) { return 'G' + t.q.gNo + ' \u00b7 Bagian ' + t.sec + ' \u00b7 soal ' + t.no + (t.q.imgDesc ? ' \u00b7 ' + t.q.imgDesc.slice(0, 36) : ''); }
+  function openBulk(items) {
+    var targets = imgQs();
+    if (!targets.length) { toast('Belum ada soal bergambar'); return; }
+    closeBulkUrls();
+    bulk.items = items; bulk.targets = targets;
+    var as = autoAssign(items, targets), opts = targets.map(function (t) { return [t.q.id, bkLabel(t)]; });
+    $('#bk-info').textContent = items.length + ' gambar terbaca, ' + targets.length + ' soal bergambar. Pasangan di bawah dibuat otomatis; ubah bila ada yang keliru.';
+    $('#bk-list').innerHTML = items.map(function (it, i) {
+      var url = URL.createObjectURL(it.blob); bulk.urls.push(url);
+      return '<div class="bk"><img alt="" src="' + url + '"><div class="bm"><span class="bn" title="' + Layout.esc(it.name) + '">' + Layout.esc(it.name.split('/').pop()) + '</span>' +
+        '<select aria-label="Soal untuk ' + Layout.esc(it.name.split('/').pop()) + '"><option value="">Lewati gambar ini</option>' +
+        opts.map(function (o) { return '<option value="' + o[0] + '"' + (as[i] && as[i].q.id === o[0] ? ' selected' : '') + '>' + Layout.esc(o[1]) + '</option>'; }).join('') +
+        '</select></div></div>';
+    }).join('');
+    clearTimeout(toast.t); $('#toast').classList.remove('on', 'act');
+    $('#dlg-bulk').showModal();
+  }
+  function closeBulkUrls() { bulk.urls.forEach(function (u) { URL.revokeObjectURL(u); }); bulk.urls = []; }
+  function applyBulk() {
+    var rows = $$('#bk-list .bk'), jobs = [];
+    rows.forEach(function (r, i) {
+      var v = $('select', r).value; if (!v) return;
+      var t = bulk.targets.filter(function (x) { return String(x.q.id) === v; })[0];
+      if (t) jobs.push({ q: t.q, blob: bulk.items[i].blob });
+    });
+    $('#dlg-bulk').close();
+    if (!jobs.length) { toast('Tidak ada gambar yang dipasang'); return; }
+    var done = 0, failed = 0;
+    var next = function (k) {
+      if (k >= jobs.length) {
+        renderCards(); schedule();
+        toast(done + ' gambar dipasang' + (failed ? ', ' + failed + ' gagal dibaca' : ''));
+        return Promise.resolve();
+      }
+      toast('Memasang gambar ' + (k + 1) + ' dari ' + jobs.length + '...');
+      return putImage(jobs[k].q, jobs[k].blob).then(function () { done++; }, function () { failed++; }).then(function () { return next(k + 1); });
+    };
+    next(0);
+  }
+
   /* ---------- prompt untuk AI ---------- */
   var BANDS = { k12: 'kelas 1-2', k3: 'kelas 3', k456: 'kelas 4-6' };
   function bandOf(kelas) { return kelas <= 2 ? 'k12' : kelas === 3 ? 'k3' : 'k456'; }
@@ -1542,7 +1830,7 @@ window.PROMPTS_READY = Promise.all(['k12', 'k3', 'k456'].map(function (k) {
     if (band === currentBand()) {
       t = t.replace(/Kelas: \[[^\]]*\]/, 'Kelas: ' + S.kelas).replace(/Jenis ujian: \[[^\]]*\]/, 'Jenis ujian: ' + S.jenis);
     }
-    return t;
+    return t.replace(/\s+$/, '') + '\n\n' + IMG_RULES;
   }
   function renderPromptUI() {
     var band = currentBand(), oth = otherBands();
@@ -2032,6 +2320,27 @@ window.PROMPTS_READY = Promise.all(['k12', 'k3', 'k456'].map(function (k) {
       var r = $('input[name="docmode"]:checked'); $('#dlg-doc').close(); DOC.run(r ? r.value : 'soal');
     });
     $('#btn-prompt').addEventListener('click', function () { copyPrompt(currentBand()); });
+    $('#btn-img-copyall').addEventListener('click', copyAllPrompts);
+    $('#btn-img-zip').addEventListener('click', function () { var f = $('#file-bulk'); f.value = ''; f.click(); });
+    $('#file-bulk').addEventListener('change', function (e) { bulkPick(e.target.files); });
+    var il = $('#img-list');
+    il.addEventListener('toggle', function (e) { var d = e.target; if (d && d.dataset && d.dataset.id) { if (d.open) openG[d.dataset.id] = 1; else delete openG[d.dataset.id]; } }, true);
+    il.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-gcopy]'); if (!b) return;
+      var d = b.closest('details'), x = imgQs().filter(function (y) { return String(y.q.id) === d.dataset.id; })[0];
+      if (x) copyText(imgPromptOf(x.q)).then(function (ok) { toast(ok ? 'Prompt G' + x.q.gNo + ' disalin' : 'Gagal menyalin. Tekan lama pada teks prompt lalu salin.'); });
+    });
+    var si = $('#sec-img');
+    si.addEventListener('dragover', function (e) { if (e.dataTransfer && [].indexOf.call(e.dataTransfer.types || [], 'Files') >= 0) { e.preventDefault(); si.classList.add('drop'); } });
+    si.addEventListener('dragleave', function (e) { if (!si.contains(e.relatedTarget)) si.classList.remove('drop'); });
+    si.addEventListener('drop', function (e) { e.preventDefault(); si.classList.remove('drop'); bulkPick(e.dataTransfer.files); });
+    $('#bk-go').addEventListener('click', applyBulk);
+    $('#bk-cancel').addEventListener('click', function () { $('#dlg-bulk').close(); });
+    $('#dlg-bulk').addEventListener('close', closeBulkUrls);
+    $('#bk-list').addEventListener('change', function (e) {
+      var s = e.target; if (s.tagName !== 'SELECT' || !s.value) return;
+      $$('#bk-list select').forEach(function (o) { if (o !== s && o.value === s.value) o.value = ''; });
+    });
     $('#btn-prompt-other').addEventListener('click', function () { copyPrompt(otherBands()[0]); });
     $('#btn-prompt-other2').addEventListener('click', function () { copyPrompt(otherBands()[1]); });
     $('#dlg-go').addEventListener('click', function () { $('#dlg').close(); doPrint(); });
