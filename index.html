@@ -150,7 +150,7 @@ details.more > summary { cursor: pointer; color: var(--accent); font-weight: 600
 .id { font-size: 12pt; }
 bdi.ar, bdi.id { unicode-bidi: isolate; }
 .sheet u { text-decoration: underline; text-underline-offset: 2px; }
-.blk.q { display: flex; direction: rtl; gap: 2mm; padding-bottom: 1.6mm; align-items: flex-start; }
+.blk.q { display: flex; direction: rtl; gap: 2mm; padding-bottom: 1.6mm; padding-right: 6mm; align-items: flex-start; }
 .blk.q .no { flex: none; min-width: 9mm; text-align: right; }
 .blk.q .qb { flex: 1; min-width: 0; }
 .qt .ln { text-align: right; }
@@ -1903,7 +1903,7 @@ window.PROMPTS_READY = Promise.all(['k12', 'k3', 'k456'].map(function (k) {
         return p.split(RXA).map(function (x, j) {
           if (!x) return '';
           if (j % 2) return run(x, { ar: 1, b: o.b, u: i % 2 });
-          return x.split(IDRUN).map(function (q) { return q ? run(q, { b: o.b, u: i % 2, sz: o.sz }) : ''; }).join('');
+          return x.split(IDRUN).map(function (q) { return q ? run((/^[(\["'\u201C\u2018]/.test(q) ? '\u200E' : '') + q + (/[.!?,;:)\]"'\u201D\u2019]$/.test(q) ? '\u200E' : ''), { b: o.b, u: i % 2, sz: o.sz }) : ''; /* LRM: tanda baca di ujung teks Latin tetap menempel, tidak pindah ke sisi kiri */ }).join('');
         }).join('');
       }).join('');
     }
@@ -1921,7 +1921,11 @@ window.PROMPTS_READY = Promise.all(['k12', 'k3', 'k456'].map(function (k) {
       return '<w:p><w:pPr>' + pp + '</w:pPr>' + (inner || '') + '</w:p>';
     }
     /* paragraf kanan-ke-kiri (rata kanan secara bawaan) */
-    function rp(inner, o) { o = o || {}; o.rtl = true; return para(inner, o); }
+    function rp(inner, o) {
+      o = o || {}; o.rtl = true;
+      if (!o.line) { o.line = 540; o.rule = 'exact'; } /* 18pt x 1,5 = 27pt, sama dengan pratinjau; 'auto' di Word jauh lebih tinggi */
+      return para(inner, o);
+    }
     var SP = para('', { line: 80, rule: 'exact' });
     var ENDP = para('', { line: 20, rule: 'exact' });
 
@@ -2005,7 +2009,7 @@ window.PROMPTS_READY = Promise.all(['k12', 'k3', 'k456'].map(function (k) {
       ], { mar: [10, 0, 10, 60] });
       var all = bd('single', 6);
       var petItems = Ops.PETUNJUK.map(function (x, i) {
-        return para(run((i + 1) + '.', { sz: 21 }) + TAB + run(x.replace('{waktu}', S.waktu), { sz: 21 }), { ind: [454, 340], line: 276 });
+        return para(run((i + 1) + '.', { sz: 21 }) + TAB + run(x.replace('{waktu}', S.waktu), { sz: 21 }), { ind: [454, 340], line: 263, rule: 'exact' });
       }).join('');
       var pet = tbl([W], [
         tr([tc(W, para(run('PETUNJUK UMUM', { b: 1, sz: 21 }), { jc: 'center' }), { bd: bd('single', 6) })]),
@@ -2014,7 +2018,7 @@ window.PROMPTS_READY = Promise.all(['k12', 'k3', 'k456'].map(function (k) {
       var tp = '';
       if (S.showTP && S.tp.length) {
         tp = para(run('TP', { b: 1, sz: 21 }), { before: 100 }) + S.tp.map(function (x, i) {
-          return para(run((i + 1) + '.', { sz: 21 }) + TAB + run(x, { sz: 21 }), { ind: [340, 340], line: 276 });
+          return para(run((i + 1) + '.', { sz: 21 }) + TAB + run(x, { sz: 21 }), { ind: [340, 340], line: 263, rule: 'exact' });
         }).join('');
       }
       return kop + para('', { line: 60, rule: 'exact' }) + ident + para('', { line: 120, rule: 'exact' }) + pet + tp + para('', { line: 60, rule: 'exact', bt: 10, before: 100, after: 40 });
@@ -2027,7 +2031,7 @@ window.PROMPTS_READY = Promise.all(['k12', 'k3', 'k456'].map(function (k) {
         var m = l.match(SPLIT);
         if (m && (m[1].match(/[A-Za-z]{2,}/g) || []).length >= 3) out.push(m[1], m[2]); else out.push(l);
       });
-      return out.map(function (l) { return rp(runs(l)); }).join('');
+      return out.map(function (l) { return rp(runs(l), /[\u0600-\u06FF]/.test(l) ? {} : { line: 312, rule: 'exact' }); }).join('');
     }
     function perintahXml(sec, hasBox) {
       var p = Ops.perintah(S.kelas, sec, hasBox);
@@ -2052,16 +2056,17 @@ window.PROMPTS_READY = Promise.all(['k12', 'k3', 'k456'].map(function (k) {
     }
     function qXml(q, no, sec) {
       var side = !!(sec !== 2 && sec !== 3 && S.imgPos !== 'top' && q.image && q.image.src && imgs[Layout.imgSrc(q, S)] && (q.image.w || 40) <= 80);
+      var IND = mm(6), Wq = W - IND; /* soal digeser dari perintah bagian */
       var iw = side ? mm(q.image.w || 40) + mm(7) : 0, tw = 0;
       if (side) { /* lebar kolom teks mengikuti baris terpanjang (perkiraan), gambar tepat di sebelahnya */
         var mx = 0, cnt = function (t) { var l = String(t).replace(/[\u064B-\u0652\u0640§]/g, '').length; if (l > mx) mx = l; };
         String(q.text).split('\n').forEach(cnt); q.options.forEach(function (o) { cnt(o); mx += 0; });
-        tw = Math.min(W - mm(9) - iw, Math.max(mm(36), Math.round((mx + 3) * 2.7 * 56.7) + mm(3)));
+        tw = Math.min(Wq - mm(9) - iw, Math.max(mm(36), Math.round((mx + 3) * 2.7 * 56.7) + mm(3)));
       }
-      var cw = side ? [mm(9), tw, iw] : [mm(9), 0]; if (!side) cw[1] = W - cw[0];
-      if (side && W - cw[0] - tw - iw > 0) cw.push(W - cw[0] - tw - iw);
+      var cw = side ? [mm(9), tw, iw] : [mm(9), 0]; if (!side) cw[1] = Wq - cw[0];
+      if (side && Wq - cw[0] - tw - iw > 0) cw.push(Wq - cw[0] - tw - iw);
       var inner = qLines(q.text);
-      if (q.image && q.image.src && !side) inner += rp(imgRun(Layout.imgSrc(q, S), q.image.w || 40), { before: 40, after: 40 });
+      if (q.image && q.image.src && !side) inner += rp(imgRun(Layout.imgSrc(q, S), q.image.w || 40), { before: 40, after: 40, line: 240, rule: 'auto' });
       if (q.options.length) inner += optsXml(q, cw[1], side);
       else if (sec === 3 || q.lines > 0) {
         var n = typeof q.lines === 'number' ? q.lines : S.essayLines;
@@ -2074,7 +2079,7 @@ window.PROMPTS_READY = Promise.all(['k12', 'k3', 'k456'].map(function (k) {
       }
       var cells = [tc(cw[0], rp(run(Ops.toAr(no) + '.', { ar: 1 }))), tc(cw[1], inner)];
       if (side) { cells.push(tc(cw[2], para(imgRun(Layout.imgSrc(q, S), q.image.w || 40), { before: 20 }))); if (cw[3]) cells.push(tc(cw[3], '')); }
-      return tbl(cw, [tr(cells, true)], { rtl: true }) + SP;
+      return tbl([IND].concat(cw), [tr([tc(IND, '')].concat(cells), true)], { rtl: true }) + SP;
     }
     function boxXml(words) {
       var ws = equalW(5, W), rows = [], single = bd('single', 6), none = bd('nil');
