@@ -1870,8 +1870,8 @@ window.PROMPTS_READY = Promise.all(['k12', 'k3', 'k456'].map(function (k) {
     $('#btn-prompt-other').textContent = 'Salin prompt ' + BANDS[oth[0]];
     $('#btn-prompt-other2').textContent = 'Salin prompt ' + BANDS[oth[1]];
     $('#prompt-hint').textContent = band === 'k12'
-      ? 'Tempel ke AI, lampirkan file materi, lalu tempel hasilnya di kotak di bawah. Bagian 2 dibuat 20 soal; centang tepat 10 yang dipakai; dua kotak jawaban (soal 1-5 dan soal 6-10, masing-masing أ sampai هـ) dibuat otomatis dari 10 soal itu. Gambar dipasang lewat ikon gambar pada kartu soal.'
-      : 'Tempel ke AI, lampirkan file materi, lalu tempel hasilnya di kotak di bawah.';
+      ? 'Tempel ke AI, lampirkan file materi (satu file = satu bab = 2 TP; 2 file jadi 4 TP), lalu tempel hasilnya di kotak di bawah. Bagian 2 dibuat 20 soal; centang tepat 10 yang dipakai; dua kotak jawaban (soal 1-5 dan soal 6-10, masing-masing أ sampai هـ) dibuat otomatis dari 10 soal itu. Gambar dipasang lewat ikon gambar pada kartu soal.'
+      : 'Tempel ke AI, lampirkan file materi (satu file = satu bab = 2 TP; 2 file jadi 4 TP), lalu tempel hasilnya di kotak di bawah.';
     $('#prompt-view').value = promptFor(band);
   }
   function copyText(text) {
