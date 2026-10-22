@@ -407,7 +407,7 @@ details.gi[open] > summary { border-bottom: 1px solid var(--line); }
       <h2>Gambar soal (Google Flow)</h2>
       <p class="hint" id="img-hint" style="margin-top:0"></p>
       <div class="row">
-        <button class="btn pri" id="btn-img-copyall" type="button"><svg class="ic"><use href="#i-copy"/></svg> Salin semua prompt</button>
+        <button class="btn pri" id="btn-img-copyall" type="button"><svg class="ic"><use href="#i-copy"/></svg> Salin 1 prompt untuk semua gambar</button>
         <button class="btn" id="btn-img-zip" type="button"><svg class="ic"><use href="#i-image"/></svg> Pasang gambar dari ZIP</button>
       </div>
       <p class="hint" style="margin-top:6px">ZIP atau banyak gambar juga bisa ditarik ke kotak ini. Berkas bernama G3.png atau 3.png dipasang ke soal G3; nama lain dipasang menurut urutan nama, dan bisa diperbaiki sebelum dipasang.</p>
@@ -1709,7 +1709,7 @@ window.PROMPTS_READY = Promise.all(['k12', 'k3', 'k456'].map(function (k) {
     sec.hidden = !list.length;
     if (!list.length) return;
     var have = list.filter(function (x) { return x.q.image; }).length;
-    $('#img-hint').textContent = list.length + ' soal bergambar, ' + have + ' sudah terpasang gambarnya. Salin prompt ke Google Flow, unduh hasilnya (ZIP atau banyak berkas), lalu pasang sekaligus.';
+    $('#img-hint').textContent = list.length + ' soal bergambar, ' + have + ' sudah terpasang gambarnya. Tekan \u201cSalin 1 prompt untuk semua gambar\u201d, tempel sekali ke Google Flow (mode agent), unduh hasilnya (ZIP atau banyak berkas), lalu pasang sekaligus.';
     $('#img-list').innerHTML = list.map(function (x) {
       var q = x.q, p = imgPromptOf(q);
       return '<details class="gi" data-id="' + q.id + '"' + (openG[q.id] ? ' open' : '') + '><summary>' +
@@ -1721,10 +1721,42 @@ window.PROMPTS_READY = Promise.all(['k12', 'k3', 'k456'].map(function (k) {
         '<div class="row"><button class="btn sm" type="button" data-gcopy' + (p ? '' : ' disabled') + '>' + IC('copy') + ' Salin prompt</button></div></div></details>';
     }).join('');
   }
+  /* Adegan saja (gaya dibuang), supaya gaya cukup ditulis sekali di prompt induk. */
+  function sceneOf(q) {
+    var p = imgPromptOf(q);
+    if (!p) return '';
+    var i = p.indexOf(IMG_STYLE);
+    if (i > -1) p = p.slice(0, i);
+    return p.replace(/[\s,.;:]+$/, '');
+  }
+  /* Satu prompt untuk semua gambar: sekali salin, tempel ke Google Flow (mode agent). */
+  function masterPrompt() {
+    var L = imgQs().map(function (x) { var s = sceneOf(x.q); return s ? { n: x.q.gNo, s: s } : null; }).filter(Boolean);
+    if (!L.length) return '';
+    var n = L.length;
+    return [
+      'ROLE: You are an autonomous image-generation agent. Complete the whole task in ONE run. Do not ask questions, do not ask for confirmation, and do not stop after the first image.',
+      '',
+      'TASK: Generate exactly ' + n + ' separate images, one for each scene listed under SCENES, in the same order (' + (n > 1 ? 'G' + L[0].n + ' to G' + L[n - 1].n : 'G' + L[0].n) + ').',
+      '',
+      'RULES:',
+      '1. One scene = one image. Never combine scenes into a grid, collage, split panel, or comic strip.',
+      '2. Every image uses the SAME shared style below, so the whole set looks consistent.',
+      '3. Output format: square 1:1. Label or name each result with its code (G1, G2, ...) so the images can be matched to the scene numbers.',
+      '4. No text of any kind inside the images (no letters, numbers, Arabic script, captions, or watermarks). Where a scene mentions a clock, show exactly the time stated, using clock hands only.',
+      '',
+      'SHARED STYLE (apply to every image): ' + IMG_STYLE,
+      '',
+      'SCENES:',
+      L.map(function (x) { return 'G' + x.n + ': ' + x.s; }).join('\n'),
+      '',
+      'FINISH: When all ' + n + ' images are generated, reply with one short list: the code (G1, G2, ...) and "done" or "failed" for each. Regenerate any that failed before finishing.'
+    ].join('\n');
+  }
   function copyAllPrompts() {
-    var t = imgQs().map(function (x) { var p = imgPromptOf(x.q); return p ? 'G' + x.q.gNo + ': ' + p : ''; }).filter(Boolean).join('\n');
+    var t = masterPrompt();
     if (!t) { toast('Belum ada prompt gambar'); return; }
-    copyText(t).then(function (ok) { toast(ok ? 'Semua prompt gambar disalin' : 'Gagal menyalin. Buka tiap soal lalu salin satu per satu.'); });
+    copyText(t).then(function (ok) { toast(ok ? 'Satu prompt untuk semua gambar disalin. Tempel ke Google Flow.' : 'Gagal menyalin. Buka tiap soal lalu salin satu per satu.'); });
   }
 
   /* ---------- pasang banyak gambar sekaligus (ZIP dari Flow atau banyak berkas) ---------- */
