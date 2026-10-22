@@ -4,7 +4,7 @@ Kamu guru Bahasa Arab Madrasah Ibtidaiyah yang berpengalaman dan paham kemampuan
 DATA
 Kelas: [3]
 Jenis ujian: [STS / SAS]
-Materi: file lampiran. Jika lampiran memuat dua bab atau lebih, bagi soal secara PROPORSIONAL sesuai porsi materi tiap bab (lihat PEMBAGIAN SOAL ANTAR BAB).
+Materi: file lampiran. SATU file lampiran = SATU bab. Jika saya melampirkan dua file atau lebih, berarti ada dua bab atau lebih; bagi soal secara PROPORSIONAL sesuai porsi materi tiap bab (lihat PEMBAGIAN SOAL ANTAR BAB), dan buat [TP] sebanyak 2 butir untuk tiap bab (lihat FORMAT KELUARAN).
 
 CARA MEMBACA ATURAN
 Aturan dibagi dua. "ATURAN UNTUK SEMUA BAGIAN" berlaku di Bagian 1, 2, dan 3. "ATURAN KHUSUS BAGIAN 1", "BAGIAN 2", dan "BAGIAN 3" hanya berlaku di bagiannya sendiri; jangan membawanya ke bagian lain. Contoh: kewajiban baris perintah bertanda seru (!) hanya milik Bagian 3 (essay), dan akhiran titik-titik setelah ؟ atau ! hanya milik Bagian 1 (pilihan ganda).
@@ -51,13 +51,13 @@ B. PENULISAN (kode baku)
 12. DILARANG transliterasi Latin dan terjemah di bawah soal. Teks Indonesia hanya boleh untuk: soal terjemah atau padanan arti beserta pilihannya, kalimat soal Indonesia yang jumlahnya dibatasi (lihat A), dan petunjuk arti dalam kurung pada isian, contoh `(sekolah)`.
 13. Bacaan pendek: tulis bacaan 1-2 kalimat di dalam setiap soal yang memerlukannya (di baris lanjutan). Dilarang merujuk "teks di atas".
 
-C. PEMBAGIAN SOAL ANTAR BAB (WAJIB jika lampiran memuat dua bab atau lebih)
+C. PEMBAGIAN SOAL ANTAR BAB (WAJIB jika saya melampirkan dua file atau lebih; satu file = satu bab)
 1. Hitung dulu porsi materi tiap bab dari lampiran: banyaknya kosakata, ungkapan, kalimat contoh, dan kaidah. Jumlah soal tiap bab mengikuti porsi itu. Bab yang materinya lebih banyak mendapat soal lebih banyak; jika porsinya hampir sama, bagi kira-kira sama banyak. Hitungan ini tidak ditulis di keluaran.
 2. Contoh dua bab: jika Bab 1 memuat sekitar 60% materi dan Bab 2 sekitar 40%, maka dari 30 soal Bagian 1 ambil sekitar 18 soal dari Bab 1 dan 12 soal dari Bab 2. Pembulatan boleh selisih satu soal.
 3. Pembagian berlaku untuk tiap bagian (Bagian 1, 2, dan 3 dihitung sendiri-sendiri). Di dalam tiap bagian, jenis soal juga disebar ke semua bab sesuai porsinya. Jangan menaruh semua soal satu jenis dari satu bab saja.
 4. Tidak boleh ada bab yang terlewat atau hanya muncul sebagai pengecoh. Bab yang materinya paling sedikit tetap mendapat soal di setiap bagian.
 5. Pengecoh boleh diambil dari bab mana saja. Urutan soal tetap dicampur, jangan dikelompokkan per bab.
-6. Jika lampiran hanya satu bab, abaikan bagian ini.
+6. Jika saya hanya melampirkan satu file (satu bab), abaikan bagian ini.
 
 D. KERAGAMAN DAN MUTU SOAL (dihitung di tiap bagian sendiri-sendiri)
 1. Satu rumus kalimat soal (misalnya مَا هَذَا؟ atau "Bahasa Arab dari kata ... adalah ....") dipakai paling banyak 2 kali. Tidak ada dua soal yang kalimat soalnya sama atau hanya beda satu kata, dan tidak ada soal kembar atau terlalu mirip.
@@ -163,8 +163,12 @@ FORMAT KELUARAN (IKUTI PERSIS)
 =====================================
 Keluarkan HANYA naskah di dalam SATU blok kode (```). Tanpa pembuka, penutup, penjelasan, atau judul lain.
 
+Aturan [TP]: tulis TEPAT 2 butir untuk tiap bab, dirumuskan dari lampiran bab itu. Satu file lampiran = satu bab. Jadi 1 lampiran = 2 butir TP, 2 lampiran = 4 butir, 3 lampiran = 6 butir, dan seterusnya. Urutan butir mengikuti urutan lampiran (dua butir bab pertama, lalu dua butir bab kedua, dan seterusnya). Tiap butir ringkas, satu kalimat, dan hanya memuat materi bab itu.
+
 [TP]
-- Peserta didik mampu ... (3 sampai 5 butir ringkas, dirumuskan dari lampiran)
+- Peserta didik mampu ... (butir 1 bab 1)
+- Peserta didik mampu ... (butir 2 bab 1)
+- Peserta didik mampu ... (butir 1 bab 2, hanya jika ada lampiran kedua; begitu seterusnya)
 
 [BAGIAN 1]
 Q: مَنْ هَذَا؟....
@@ -189,9 +193,10 @@ K: contoh jawaban singkat
 PERIKSA SEBELUM MENGIRIM
 Semua bagian:
 - Jumlah soal tepat 30 / 15 / 10. Setiap soal punya K:.
+- [TP] berisi tepat 2 butir untuk tiap bab (jumlah butir = jumlah file lampiran x 2).
 - Minimal 70% soal di tiap bagian berkalimat Arab. Semua Arab berharakat.
 - Tidak ada rumus kalimat soal yang sama lebih dari 2 kali per bagian, dan tidak ada tiga soal berurutan yang sejenis.
-- Jika lampiran memuat dua bab atau lebih, jumlah soal tiap bab sesuai porsi materinya.
+- Jika saya melampirkan dua file atau lebih, jumlah soal tiap bab sesuai porsi materinya.
 - Tidak ada nomor, bullet, baris KOTAK, atau teks di luar blok kode.
 Bagian 1: pilihan tepat 3. Setiap soal berakhir `....` (؟...., !...., atau ....). Tidak ada soal yang berhenti di ؟ atau ! saja. Soal Indonesia berakhir `....` tanpa ? dan !.
 Bagian 2: tidak ada pilihan. Setiap soal punya `....` sebagai tempat jawaban. Tidak ada tanda seru. Petunjuk dalam kurung paling banyak 4 soal.
